@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### 🐛 Bug Fixes
+- Recognize the `poe-<mac>_<port>` unique_id prefix, so the PoE toggle, PoE power and power cycle stay available on ports that carry a name in the UniFi controller.
+- Keep the row grouping a model declares. Switch layouts with more than one declared row are no longer rewritten to 8 ports per row; single-row fallbacks keep the previous default. Rows wider than the card are still repacked to fit.
+- Add the US-24-250W (`US24P250`), which was resolved as a USW 24 PoE and therefore lost its PoE controls on ports 17 to 24.
+
+### ✨ Improvements
+- Add the US-16-XG (`USXG`) with its 12 SFP+ and 4 RJ45 ports.
+- Map the `U7LT` and `U7HD` access point model codes to UAP AC Lite and UAP HD.
+- Report grid options to Home Assistant, so a switch or gateway card takes the full width of a section instead of a single view column. Access point cards keep the standard width. Set `grid_options` on the card to override.
+
 ## [v0.7.92-dev]
 
 ### 🐛 Bug Fixes

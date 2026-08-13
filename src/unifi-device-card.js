@@ -224,6 +224,21 @@ class UnifiDeviceCard extends HTMLElement {
     return this._cardSize || this._estimateCardSize();
   }
 
+  // Sections view sizing. Derived from the device type only, never from a
+  // measurement: getGridOptions() decides the width that a measurement would
+  // read back, so feeding one in would oscillate. Whatever width the card
+  // actually receives is handled by the row repacking in _buildEffectiveRows().
+  getGridOptions() {
+    const type = this._ctx?.type;
+    if (type === "access_point") {
+      return { columns: 12, rows: "auto" };
+    }
+    if (type === "switch" || type === "gateway") {
+      return { columns: "full", rows: "auto" };
+    }
+    return { rows: "auto" };
+  }
+
   _estimateCardSize() {
     if (!this._config?.device_id) return 4;
     if (!this._ctx) return 5;
