@@ -324,6 +324,17 @@ export const MODEL_REGISTRY = {
   },
 
   // USW 24 PoE Gen2  — 24× 1G RJ45, Ports 1-16 PoE+, 2× SFP
+  US24P250: {
+    kind: "switch", frontStyle: "eight-grid",
+    rows: [range(1, 8), range(9, 16), range(17, 24)],
+    portCount: 26, displayModel: "US-24-250W", theme: "silver",
+    poePortRange: [1, 24],
+    specialSlots: [
+      { key: "sfp_1", label: "SFP 1", port: 25 },
+      { key: "sfp_2", label: "SFP 2", port: 26 },
+    ],
+  },
+
   USL24P: {
     kind: "switch", frontStyle: "eight-grid",
     rows: [range(1, 8), range(9, 16), range(17, 24)],
@@ -542,6 +553,12 @@ export const MODEL_REGISTRY = {
   },
 
   // USW Enterprise XG 24  — 24× RJ45, 2× SFP+
+  USXG: {
+    kind: "switch", frontStyle: "single-row", rows: [range(13, 16)],
+    portCount: 16, displayModel: "US-16-XG", theme: "silver",
+    specialSlots: range(1, 12).map((p) => ({ key: `sfp_${p}`, label: `SFP+ ${p}`, port: p })),
+  },
+
   USXG24: {
     kind: "switch", frontStyle: "six-grid",
     rows: [range(1, 6), range(7, 12), range(13, 18), range(19, 24)],
