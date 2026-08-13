@@ -75,7 +75,13 @@ function applyRj45LayoutHints(layout) {
 
   return {
     ...layout,
-    rj45_odd_even: isSwitchOrGateway && !isExcluded && numberedRj45Count > 8,
+    // A model may state the odd/even panel explicitly. Devices with eight or
+    // fewer ports fall below the automatic threshold but can still be built
+    // that way, the UDM Pro being the obvious one.
+    rj45_odd_even:
+      typeof layout?.rj45_odd_even === "boolean"
+        ? layout.rj45_odd_even
+        : isSwitchOrGateway && !isExcluded && numberedRj45Count > 8,
   };
 }
 
@@ -330,8 +336,8 @@ export const MODEL_REGISTRY = {
     portCount: 26, displayModel: "US-24-250W", theme: "silver",
     poePortRange: [1, 24],
     specialSlots: [
-      { key: "sfp_1", label: "SFP 1", port: 25 },
-      { key: "sfp_2", label: "SFP 2", port: 26 },
+      { key: "sfp_1", label: "SFP 1", port: 25, row: 0 },
+      { key: "sfp_2", label: "SFP 2", port: 26, row: 1 },
     ],
   },
 
@@ -554,9 +560,14 @@ export const MODEL_REGISTRY = {
 
   // USW Enterprise XG 24  — 24× RJ45, 2× SFP+
   USXG: {
-    kind: "switch", frontStyle: "single-row", rows: [range(13, 16)],
+    kind: "switch", frontStyle: "six-grid", rows: [range(1, 12)],
     portCount: 16, displayModel: "US-16-XG", theme: "silver",
-    specialSlots: range(1, 12).map((p) => ({ key: `sfp_${p}`, label: `SFP+ ${p}`, port: p })),
+    specialSlots: [
+      { key: "rj45_13", label: "13", port: 13, media: "rj45", row: 0 },
+      { key: "rj45_14", label: "14", port: 14, media: "rj45", row: 0 },
+      { key: "rj45_15", label: "15", port: 15, media: "rj45", row: 1 },
+      { key: "rj45_16", label: "16", port: 16, media: "rj45", row: 1 },
+    ],
   },
 
   USXG24: {
@@ -892,10 +903,11 @@ export const MODEL_REGISTRY = {
   UDMPRO: {
     kind: "gateway", frontStyle: "gateway-rack", rows: [range(1, 8)],
     portCount: 11, displayModel: "UDM Pro", theme: "silver",
+    rj45_odd_even: true,
     specialSlots: [
-      { key: "wan",   label: "WAN",    port: 9  },
-      { key: "sfp_1", label: "SFP+ 1", port: 10 },
-      { key: "sfp_2", label: "SFP+ 2", port: 11 },
+      { key: "sfp_1", label: "SFP+ 1", port: 10, row: 0 },
+      { key: "wan",   label: "WAN",    port: 9,  media: "rj45", row: 1 },
+      { key: "sfp_2", label: "SFP+ 2", port: 11, row: 1 },
     ],
   },
   UDMPROSE: {
