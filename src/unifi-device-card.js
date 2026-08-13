@@ -233,10 +233,22 @@ class UnifiDeviceCard extends HTMLElement {
     if (type === "access_point") {
       return { columns: 12, rows: "auto" };
     }
-    if (type === "switch" || type === "gateway") {
-      return { columns: "full", rows: "auto" };
+    if (type !== "switch" && type !== "gateway") {
+      return { rows: "auto" };
     }
-    return { rows: "auto" };
+
+    // Ask for width in proportion to the widest line the front panel has to
+    // draw. A section column is 12 grid columns wide, so 12 is one standard
+    // card and 24 is two. The section clamps the span to its own width
+    // (grid-column: span min(--column-size, --grid-column-count)), so asking
+    // for more than a narrow section holds is safe.
+    const layout = this._ctx?.layout;
+    const widestRow = (layout?.rows || []).reduce((max, row) => Math.max(max, row.length), 0);
+    const slots = Math.max(widestRow, (layout?.specialSlots || []).length);
+
+    if (slots <= 8) return { columns: 12, rows: "auto" };
+    if (slots <= 12) return { columns: 24, rows: "auto" };
+    return { columns: "full", rows: "auto" };
   }
 
   _estimateCardSize() {
@@ -279,7 +291,15 @@ class UnifiDeviceCard extends HTMLElement {
 
       const panelWidth = this._measuredFrontPanelContentWidth();
       if (panelWidth <= 0) return;
-      if (Math.abs(panelWidth - this._lastMeasuredPanelWidth) < 1) return;
+
+      // The panel width alone is not enough. The card can be widened after its
+      // first paint - a sections view applies the column span in its own render
+      // pass - and the width then matches on the next measurement while the
+      // ports are still packed for the old one. Compare the column count the
+      // DOM was actually built with as well.
+      const widthChanged = Math.abs(panelWidth - this._lastMeasuredPanelWidth) >= 1;
+      const columnsChanged = this._maxFittableColumns() !== this._renderedFittableColumns;
+      if (!widthChanged && !columnsChanged) return;
 
       this._lastMeasuredPanelWidth = panelWidth;
       this._render();
@@ -1079,6 +1099,9 @@ class UnifiDeviceCard extends HTMLElement {
     if (!extraPorts.length && !baseRows.length && !orderedPorts.length) return [];
 
     const fitCols = this._maxFittableColumns();
+    // Remember the column count this layout was built with, so _finalizeRender
+    // can tell a stale panel from a settled one.
+    this._renderedFittableColumns = fitCols;
 
     if (!baseRows.length) {
       if (!Number.isFinite(fitCols) || extraPorts.length <= fitCols) return [extraPorts];
